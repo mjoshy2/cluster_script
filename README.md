@@ -1,4 +1,4 @@
-# class_decomposition_project
+# Class Decomposition via Clustering Project
 
 The project can be run by simply executing the build script.
 
