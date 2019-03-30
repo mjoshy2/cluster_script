@@ -1,4 +1,3 @@
-import pandas as pd
 import tensorflow as tf
 import numpy as np
 import sys
@@ -9,42 +8,15 @@ credit_data = Util.open_file("../data/credit_data.csv")
 
 # create lists of types of features
 numerical = ["Duration", 'InstallmentRatePecnt', 'PresentResidenceTime', 'Age']
-categorical = ["CheckingAcctStat", "CreditHistory", "Purpose", 'Savings', 'Employment', 'Property', 'Telephone']
 target = ['CreditStatus']
 
-positive_class, negative_class = Util.decompose_classes(credit_data, 'CreditStatus')
-
-# get numerical, categorical and labels for each class
-positive_numerical, positive_categorical, positive_target = \
-  Util.pre_process_data(positive_class, numerical, categorical, target)
-negative_numerical, negative_categorical, negative_target =  \
-  Util.pre_process_data(negative_class, numerical, categorical, target)
-
-# cluster data and get cluster labels
-positive_cluster = Util.cluster_data(positive_numerical)  # .join(positive_categorical)
-negative_cluster = Util.cluster_data(negative_numerical)
-negative_cluster = np.array([x+3 for x in negative_cluster])
-
-# give the new cluster label column a name
-positive_cluster_labels = pd.DataFrame(positive_cluster, columns=['Cluster Label'])
-negative_cluster_labels = pd.DataFrame(negative_cluster, columns=['Cluster Label'])
-
-# put together all the data again so we can shuffle it
-df_positive = positive_numerical.join(positive_cluster_labels)
-df_negative = negative_numerical.join(negative_cluster_labels)
-complete_df = pd.concat([df_positive, df_negative])
-complete_df = complete_df.reset_index(drop=True)
-
-# shuffle the data
-complete_df = complete_df.sample(frac=1).reset_index(drop=True)
-
-train_x = complete_df[numerical]
-train_y = Util.encode(complete_df['Cluster Label'])
+credit_data = credit_data.sample(frac=1).reset_index(drop=True)
+train_x, train_y = Util.pre_process_data(credit_data, numerical, target)
 
 # dividing the dataset into training and test sets
 x_train, y_train, x_test, y_test = Util.split_data(0.8, train_x, train_y)
 
-n_hidden_1 = 15
+n_hidden_1 = 8
 n_input = train_x.shape[1]
 n_classes = train_y.shape[1]
 
@@ -60,7 +32,7 @@ biases = {
 
 keep_prob = tf.placeholder("float")
 
-training_epochs = 5000
+training_epochs = 1000
 display_step = 200
 batch_size = 32
 
@@ -98,4 +70,5 @@ with tf.Session() as sess:
 
     correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-    print("Accuracy:", accuracy.eval({x: x_test, y: y_test, keep_prob: 1.0}))
+    preds = accuracy.eval({x: x_test, y: y_test, keep_prob: 1.0})
+    print("Testing complete", preds)
