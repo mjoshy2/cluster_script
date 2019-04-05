@@ -32,7 +32,7 @@ biases = {
 
 keep_prob = tf.placeholder("float")
 
-training_epochs = 1000
+training_epochs = 5000
 display_step = 200
 batch_size = 32
 
@@ -71,4 +71,4 @@ with tf.Session() as sess:
     correct_prediction = tf.equal(tf.argmax(predictions, 1), tf.argmax(y, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
     preds = accuracy.eval({x: x_test, y: y_test, keep_prob: 1.0})
-    print("Testing complete", preds)
+    print("Accuracy for Regular Neural Network is ", preds)

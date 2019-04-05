@@ -1,8 +1,8 @@
+from __future__ import division
 import pandas as pd
 import tensorflow as tf
 from sklearn.cluster import SpectralClustering
 from math import floor
-
 
 # read csv file and return a pandas dataframe object of the csv file
 def open_file(filename):
@@ -33,21 +33,26 @@ def cluster_data(dataframe):
 
 
 # separates out the data by numerical, categorical and target values
-def pre_process_data(dataframe, numerical_col, categorical_col, target_col):
+def pre_process_data(dataframe, numerical_col, target_col):
     numerical_features = dataframe[numerical_col]
-    categorical_features = dataframe[categorical_col]
+    # categorical_features = dataframe[categorical_col]
     label = dataframe[target_col]
-    return numerical_features, categorical_features, label
+    return numerical_features, label
 
 
 # splits the data into 4 parts, train_features, train_labels, test_features, test_labels
-def split_data(train_size, train_x, train_y):
+def split_data(train_size, train_x, train_y, true_labels=None):
     train_cnt = floor(train_x.shape[0] * train_size)
     x_train = train_x.iloc[0:train_cnt].values
     y_train = train_y.iloc[0:train_cnt].values
     x_test = train_x.iloc[train_cnt:].values
     y_test = train_y.iloc[train_cnt:].values
-    return x_train, y_train, x_test, y_test
+
+    if true_labels is None:
+        return x_train, y_train, x_test, y_test
+
+    test_true_labels = true_labels.iloc[train_cnt:].values
+    return x_train, y_train, x_test, y_test, test_true_labels
 
 
 def multilayer_perceptron(x, weights, biases, keep_prob):
@@ -56,3 +61,10 @@ def multilayer_perceptron(x, weights, biases, keep_prob):
     layer_1 = tf.nn.dropout(layer_1, keep_prob)
     out_layer = tf.matmul(layer_1, weights['out']) + biases['out']
     return out_layer
+
+def get_accuracy(results):
+    count = 0
+    for result in results:
+        if result[0] == result[1]:
+            count += 1
+    return count/len(results)

@@ -115,5 +115,4 @@ for values in outputs:
 
 finished = list(zip(final_predictions, test_true_labels))
 accuracy = Util.get_accuracy(finished)
-print("Final Done")
-print(accuracy)
+print("Accuracy for Clustered Neural Network is ", accuracy)
